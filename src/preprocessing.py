@@ -21,6 +21,9 @@ HAND_COLUMNS = {
         "Surfboard_Position_y",
         "Surfboard_Position_z",
     ],
+    "paddle" : [
+        "Paddle_Contribution",
+    ]
 }
 
 
@@ -38,6 +41,7 @@ def load_csv(file_path, trim_rows=10):
         *HAND_COLUMNS["left"],
         *HAND_COLUMNS["right"],
         *HAND_COLUMNS["board"],
+        *HAND_COLUMNS["paddle"],
     ]
 
     missing = [column for column in required_columns if column not in df.columns]
@@ -148,6 +152,13 @@ def preprocess_data(
     left_acceleration = np.gradient(left_velocity, time, axis=0)
     right_acceleration = np.gradient(right_velocity, time, axis=0)
 
+    #paddle contribution
+    paddle_contribution = (
+        df[HAND_COLUMNS["paddle"]]
+        .fillna(0)
+        .to_numpy()
+    )
+
     return {
         "time": time,
         "left_position": left_hand,
@@ -161,4 +172,5 @@ def preprocess_data(
         "right_acceleration": right_acceleration,
         "left_snap_frames": left_snap_frames,
         "right_snap_frames": right_snap_frames,
+        "paddle_contribution": paddle_contribution,
     }

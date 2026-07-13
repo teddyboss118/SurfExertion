@@ -10,13 +10,14 @@ def velocity_magnitude_method(data):
     left_speed = np.linalg.norm(data["left_velocity"], axis=1)
     right_speed = np.linalg.norm(data["right_velocity"], axis=1)
 
-    return left_speed + right_speed
+    return left_speed + right_speed, "Velocity Magnitude (m/s)"
 
 
 def velocity_acceleration_method(data, acceleration_weight=0.1):
     """
     E = alpha * total acceleration
       + (1 - alpha) * total velocity
+    *** normalized using max velocity, acceleration ***
     """
     if not 0 <= acceleration_weight <= 1:
         raise ValueError("acceleration_weight must be between 0 and 1.")
@@ -37,12 +38,18 @@ def velocity_acceleration_method(data, acceleration_weight=0.1):
     )
     total_acceleration = left_acceleration + right_acceleration
 
+    max_accleration = max(total_acceleration)
+    max_velocity = max(total_speed)
+
+    velocity_norm = total_speed / max_velocity
+    acceleration_norm = total_acceleration / max_accleration
+
     exertion = (
-        acceleration_weight * total_acceleration
-        + velocity_weight * total_speed
+        acceleration_weight * acceleration_norm
+        + velocity_weight * velocity_norm
     )
 
-    return exertion
+    return exertion, "Normalized Velocity & Acceleration"
 
 
 def energy_method(
@@ -81,7 +88,7 @@ def energy_method(
         + potential_weight * potential_total
     )
 
-    return exertion
+    return exertion, "Weighted Total Energy (J)"
 
 
 def work_method(data, hand_mass=0.4):
@@ -103,5 +110,7 @@ def work_method(data, hand_mass=0.4):
     left_work = np.sum(left_force * left_displacement, axis=1)
     right_work = np.sum(right_force * right_displacement, axis=1)
 
-    return left_work + right_work
+    return left_work + right_work, "Work Approximation (J)"
 
+def paddle_method(data):
+    return data["paddle_contribution"], "Unknown Units"
