@@ -2,11 +2,17 @@ import numpy as np
 import pandas as pd
 from src.instantaneous_methods import velocity_magnitude_method
 
-def partition_data(data, dependent, bucket_size):
+def partition_data(data, dependent, bucket_size, value_name="avg_value"):
     if bucket_size <= 0:
         raise ValueError("bucket_size must be greater than zero.")
 
-    time = data["time"]
+    dependent = np.asarray(dependent).squeeze()
+    if dependent.ndim != 1:
+        raise ValueError(
+            f"dependent must be 1-dimensional after squeezing, got shape {dependent.shape}."
+        )
+
+    time = np.asarray(data["time"])[-len(dependent):]  # align lengths
 
     df = pd.DataFrame({
         "time": time,
@@ -21,14 +27,15 @@ def partition_data(data, dependent, bucket_size):
             start_time=("time", "min"),
             end_time=("time", "max"),
             bucket_length=("y", "size"),
-            avg_VM=("y", "mean"),
+            **{value_name: ("y", "mean")}
         )
     )
 
     return result
 
 def partitioned_average_over_interval(data, dependent, t_1, t_2):
-    time = data["time"]
+    dependent = np.asarray(dependent).squeeze()
+    time = np.asarray(data["time"])[-len(dependent):]  # align lengths
 
     mask = (time >= t_1) & (time < t_2)
 

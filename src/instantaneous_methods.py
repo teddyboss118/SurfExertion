@@ -110,7 +110,7 @@ def work_method(data, hand_mass=0.4):
     left_work = np.sum(left_force * left_displacement, axis=1)
     right_work = np.sum(right_force * right_displacement, axis=1)
 
-    return left_work + right_work, "Work Approximation (J)"
+    return np.abs(left_work) + np.abs(right_work), "Work Approximation (J)"
 
 def paddle_method(data):
-    return data["paddle_contribution"], "Unknown Units"
+    return abs(data["paddle_contribution"]), "Paddle Contribution (m/s)"
